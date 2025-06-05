@@ -1,21 +1,34 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using System.Collections.Generic;
+
 namespace csharp_books.Server.Controllers
 {
   public class BookController : BaseController
   {
-    // This controller will handle book-related requests.
-    // You can implement methods to get, add, update, and delete books here.
-    // For example:
-    
-    // [HttpGet]
-    // public IActionResult GetBooks()
-    // {
-    //     // Logic to retrieve books from the database
-    // }
-    
-    // [HttpPost]
-    // public IActionResult AddBook(Book book)
-    // {
-    //     // Logic to add a new book to the database
-    // }
+    private readonly IServiceProvider _serviceProvider;
+    public BookController(IServiceProvider serviceProvider)
+    {
+      _serviceProvider = serviceProvider;
+    }
+
+    [HttpGet("secure/currentloans")]
+    public ActionResult<List<ShelfCurrentLoansResponse>> CurrentLoans([FromHeader] string Authorization)
+    {
+      try
+      {
+        string userEmail = ExtractUserEmail(Authorization);
+        var loans = _serviceProvider.CurrentLoans(userEmail);
+        return Ok(loans);
+      }
+      catch (Exception ex)
+      {
+        return BadRequest(ex.Message);
+      }
+    }
+
+
+
+
   }
 }
